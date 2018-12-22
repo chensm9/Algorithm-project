@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <fstream>
 using namespace std;
 
 #define random(x) (rand()%x)
@@ -26,14 +27,14 @@ private:
     int** assignmentMap; // 对应工厂和顾客开销的二维表
 
 public:
-    void input() {
-        cin >> Fnum >> Cnum;
+    void input(istream& in) {
+        in >> Fnum >> Cnum;
         FList = new Factility[Fnum];
         CList = new Customer[Cnum];
         // 输入相关信息
         for (int i = 0; i < Fnum; i++) {
             double Capacity, OpenCost;
-            cin >> Capacity >> OpenCost;
+            in >> Capacity >> OpenCost;
             FList[i].Capacity = Capacity;
             FList[i].OpenCost = OpenCost;
             FList[i].leftCapacity = Capacity;
@@ -41,7 +42,7 @@ public:
 
         for (int i = 0; i < Cnum; i++) {
             double demand;
-            cin >> demand;
+            in >> demand;
             CList[i].demand = demand;
         }
 
@@ -50,7 +51,7 @@ public:
             assignmentMap[i] = new int[Cnum];
             for (int j = 0; j < Cnum; j++) {
                 double t;
-                cin >> t;
+                in >> t;
                 assignmentMap[i][j] = t;
             }
         }
@@ -81,13 +82,30 @@ public:
         }
     }
 
-    void HCrun() {
-        input();
+    void clear() {
+        if (FList != nullptr) {
+            delete []FList;
+            FList = nullptr;
+        }
+        if (CList != nullptr) {
+            delete []CList;
+            CList = nullptr;
+        }
+        if (assignmentMap != nullptr) {
+            for (int i = 0; i < Fnum; i++)
+                delete [] assignmentMap[i];
+            delete [] assignmentMap;
+            assignmentMap = nullptr;
+        }
+    }
+
+    // 局部搜索法
+    int HCrun() {
         initBestSolution();
         srand((int)time(0));
         int flag = 0;
         int bestSolution = evaluate(FList, CList);
-        cout << "当前最好：" << bestSolution << endl;
+        // cout << "当前最好：" << bestSolution << endl;
         Factility* newFList = new Factility[Fnum];
         Customer* newCList = new Customer[Cnum];
         while(flag < 10000) {
@@ -127,15 +145,28 @@ public:
                 bestSolution = newSolution;
                 swap(CList, newCList);
                 swap(FList, newFList);
-                cout << "当前最好: " << bestSolution << endl;
+                // cout << "当前最好: " << bestSolution << endl;
                 flag = 0;
             }
             flag++;
         }
+        return bestSolution;
     }
 };
 
 int main() {
     HCsolution solution;
-    solution.HCrun();
+    for (int i = 1; i <= 71; i++) {
+        int start=clock();
+        string file = "./Instances/p" + to_string(i);
+        fstream f(file);
+        solution.input(f);
+        int result = solution.HCrun();
+        int finish=clock();
+        double totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+        cout << "p" << i << ": " << result << "\t"
+             << "运行时间: " << totaltime << "秒" << endl;
+        solution.clear();
+    }
+    // solution.HCrun();
 }
