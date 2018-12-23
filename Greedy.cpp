@@ -138,27 +138,39 @@ public:
             CList[c_id].belongTo = f_id;
         }
         int bestSolution = evaluate(FList, CList);
+        cout << bestSolution << endl;
+        for (int i = 0; i < Fnum; i++) {
+            if (FList[i].leftCapacity == FList[i].Capacity)
+                cout << "0 ";
+            else
+                cout << "1 ";
+        }
+        cout << endl;
+        for (int i = 0; i < Cnum; i++) {
+            cout << CList[i].belongTo+1 << " ";
+        }
+        cout << endl;
         return bestSolution;
     }
 };
 
 int main() {
     GreedySolution solution;
-    // for (int i = 1; i <= 71; i++) {
-    //     int start=clock();
-    //     string file = "./Instances/p" + to_string(i);
-    //     fstream f(file);
-    //     solution.input(f);
-    //     int result = solution.SArun();
-    //     int finish=clock();
-    //     double totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-    //     cout << "p" << i << ": " << result << "\t"
-    //          << "运行时间: " << totaltime << "秒" << endl;
-    //     solution.clear();
-    // }
+    for (int i = 1; i <= 71; i++) {
+        int start=clock();
+        string file = "./Instances/p" + to_string(i);
+        fstream f(file);
+        solution.input(f);
+        cout << "p" << i <<  "的运行结果如下：" << endl;
+        int result = solution.Greedyrun();
+        int finish=clock();
+        double totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+        // cout << "|p" << i << "|" << result << "|" << "" << totaltime << "|" << endl;
+        solution.clear();
+    }
     // fstream f("./Instances/p1");
     // solution.input(f);
-    solution.input(cin);
-    int result =  solution.Greedyrun();
-    cout << result << endl;
+    // solution.input(cin);
+    // int result =  solution.Greedyrun();
+    // cout << result << endl;
 }

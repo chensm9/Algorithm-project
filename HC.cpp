@@ -4,6 +4,7 @@
 #include <ctime>
 #include <algorithm>
 #include <fstream>
+#include <climits>
 using namespace std;
 
 #define random(x) (rand()%x)
@@ -44,6 +45,7 @@ public:
             double demand;
             in >> demand;
             CList[i].demand = demand;
+            CList[i].belongTo = -1;
         }
 
         assignmentMap = new int*[Fnum];
@@ -99,9 +101,37 @@ public:
         }
     }
 
+    // 贪心算法流程
+    void Greedyrun() {
+        for (int i = 0; i < Cnum; i++) {
+            int greedyVal = INT_MAX;
+            int c_id = -1, f_id = -1;
+            for (int j = 0; j < Cnum; j++) {
+                if (CList[j].belongTo != -1)
+                    continue;
+                for (int k = 0; k < Fnum; k++) {
+                    if (CList[j].demand <= FList[k].leftCapacity) {
+                        int tempVal = assignmentMap[k][j] / CList[j].demand;
+                        if (FList[k].leftCapacity == FList[k].Capacity)
+                            tempVal += FList[k].OpenCost / CList[j].demand;
+                        if (greedyVal > tempVal) {
+                            greedyVal = tempVal;
+                            c_id = j;
+                            f_id = k;
+                        }
+                    }
+                }
+            }
+            FList[f_id].leftCapacity -= CList[c_id].demand;
+            CList[c_id].belongTo = f_id;
+        }
+    }
+
     // 局部搜索法
     int HCrun() {
-        initBestSolution();
+        // initBestSolution();
+        // 利用贪心算法产生一个解
+        Greedyrun();
         srand((int)time(0));
         int flag = 0;
         int bestSolution = evaluate(FList, CList);
@@ -150,6 +180,18 @@ public:
             }
             flag++;
         }
+        cout << bestSolution << endl;
+        for (int i = 0; i < Fnum; i++) {
+            if (FList[i].leftCapacity == FList[i].Capacity)
+                cout << "0 ";
+            else
+                cout << "1 ";
+        }
+        cout << endl;
+        for (int i = 0; i < Cnum; i++) {
+            cout << CList[i].belongTo+1 << " ";
+        }
+        cout << endl;
         return bestSolution;
     }
 };
@@ -161,11 +203,11 @@ int main() {
         string file = "./Instances/p" + to_string(i);
         fstream f(file);
         solution.input(f);
+        cout << "p" << i << "的运行结果如下：" << endl;
         int result = solution.HCrun();
         int finish=clock();
         double totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-        cout << "p" << i << ": " << result << "\t"
-             << "运行时间: " << totaltime << "秒" << endl;
+        // cout << "|p" << i << "|" << result << "|" << "" << totaltime << "s|" << endl;
         solution.clear();
     }
     // solution.HCrun();
